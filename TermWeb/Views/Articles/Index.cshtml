@@ -1,0 +1,120 @@
+﻿@model TermWeb.Models.CategoryViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>특가 목록</h1>
+
+
+<p>
+    <a asp-action="Create">글 작성</a>
+</p>
+
+
+<form asp-controller="Articles" asp-action="Index" method="get">
+    <p>
+        @using (Html.BeginForm())
+        {
+        <p>
+            카테고리 : @Html.DropDownList("Category", "모두")
+
+            제목 : @Html.TextBox("SearchString")
+            <input type="submit" value="검색" />
+        </p>
+    }
+    </form>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Articles![0].Title)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Articles![0].IsStillGoing)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Articles![0].WriterID)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Articles![0].MallName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Articles![0].PostDate)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Articles!)
+            {
+                <tr>
+                    <td style="max-width:450px;">
+                        <p><a href="/Articles/Details/@Html.DisplayFor(modelItem => item.Id)">[@Html.DisplayFor(modelItem => item.Head)] @Html.DisplayFor(modelItem => item.Title)</a> </p>
+                        <p>
+                            <span style="text-decoration:line-through;">@Html.DisplayFor(modelItem => item.Currency)@Html.DisplayFor(modelItem => item.OrigPrice)</span> -> @Html.DisplayFor(modelItem => item.Currency)@Html.DisplayFor(modelItem => item.Price) + 배송비 @Html.DisplayFor(modelItem => item.Currency)@Html.DisplayFor(modelItem => item.DeliverPrice) <br />(@Html.DisplayFor(modelItem => item.Discount)% 할인)
+                        </p>
+                        <p style="width: 440px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">@Html.DisplayFor(modelItem => item.Etc)</p>
+                    </td>
+                    <td style="width: 100px;">
+                        @Html.DisplayFor(modelItem => item.IsStillGoing)
+                    </td>
+                    <td style="white-space: nowrap;">
+                        @Html.DisplayFor(modelItem => item.WriterID)
+                    </td>
+                    <td style="white-space: nowrap;">
+                        <a href="@item.Link">@Html.DisplayFor(modelItem => item.MallName)</a>
+                    </td>
+                    <td>
+                        <p>@Html.DisplayFor(modelItem => item.PostDate)</p>
+                        <p>@Html.DisplayFor(modelItem => item.Deadline) 까지<br />
+                        <p>
+                            <span id="countdown-@item.Id">Calculating...</span>
+                            <script>
+                                function startCountdown(itemId, deadlineString) {
+                                    var deadline = new Date(deadlineString);
+
+                                    // Update countdown every second
+                                    var countdownInterval = setInterval(function () {
+                                        // 현재 시간을 가져오기
+                                        var now = new Date();
+
+                                        // Calculate time remaining
+                                        var timeRemaining = deadline - now;
+
+                                        // Check if the deadline has passed
+                                        if (timeRemaining <= 0) {
+                                            clearInterval(countdownInterval); // Stop the countdown when the deadline is reached
+                                            document.getElementById('countdown-' + itemId).innerHTML = "Expired";
+                                        } else {
+                                            // Format the time remaining (adjust as needed)
+                                            var days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                                            var hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                            var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                                            var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+                                            // Display the formatted time remaining
+                                            document.getElementById('countdown-' + itemId).innerHTML =
+                                                days + "일 " + hours + "시간 " + minutes + "분 " + seconds + "초";
+                                        }
+                                    }, 1000); // Update every 1000 milliseconds (1 second)
+                                }
+
+                                // Call the function for the current item
+                                startCountdown('@item.Id', '@item.Deadline.ToString("yyyy-MM-ddTHH:mm:ss")');
+                            </script> 남았습니다.
+                        </p>
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">수정</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">글 보기</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">글 삭제</a>
+                    </td>
+                </tr>
+            }
+
+
+        </tbody>
+    </table>
+
